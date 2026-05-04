@@ -43,7 +43,3 @@ Dans notre SI "Dar-Connect", nous gérons les deux types de données mentionnés
 *   **Données Structurées :** Ce sont les informations stockées dans nos tables SQL (Noms, adresses des maisons, dates de visites). Elles sont organisées, liées par des clés étrangères et faciles à requêter.
 *   **Données Non-structurées :** Ce sont les scans de cartes d'identité (fichiers images/PDF) stockés dans le Storage. Ces données n'ont pas de format fixe prédéfini et nécessitent un stockage d'objets (Bucket) plutôt qu'une table classique.
 
-3. **Lancer le serveur :**
-   ```bash
-   npm run dev
-   ```
