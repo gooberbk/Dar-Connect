@@ -54,39 +54,40 @@ export default function NavbarClient({ user, isAdmin }: NavbarClientProps) {
             <LanguageSwitcher />
             
             {user ? (
-              <div className="flex items-center gap-2">
-                {isAdmin && (
+              <div className="flex items-center gap-3">
+                {isAdmin ? (
                   <Link
                     href="/admin"
-                    className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                    className="flex items-center gap-2 px-4 py-2 text-sm font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 rounded-full transition-all duration-200 shadow-sm border border-emerald-100"
                   >
                     <LayoutDashboard className="w-4 h-4" />
-                    {t('dashboard')}
+                    Admin
                   </Link>
-                )}
-                {!isAdmin && (
+                ) : (
                   <Link
                     href="/dashboard"
-                    className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                    className="flex items-center gap-2 px-4 py-2 text-sm font-bold text-blue-700 bg-blue-50 hover:bg-blue-100 rounded-full transition-all duration-200 shadow-sm border border-blue-100"
                   >
                     <LayoutDashboard className="w-4 h-4" />
                     {t('myReservations')}
                   </Link>
                 )}
-                <div className="flex items-center gap-2 px-3 py-1.5 bg-gray-50 rounded-lg border border-gray-200">
-                  <div className="w-7 h-7 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-full flex items-center justify-center">
+                
+                <div className="flex items-center pl-1.5 pr-4 py-1.5 bg-white rounded-full border border-gray-200 shadow-sm hover:shadow-md transition-all cursor-default">
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-gray-800 to-gray-600 flex items-center justify-center mr-2 shadow-inner">
                     <UserIcon className="w-4 h-4 text-white" />
                   </div>
-                  <span className="text-sm font-medium text-gray-700 max-w-[150px] truncate">
+                  <span className="text-sm font-bold text-gray-700 max-w-[120px] truncate">
                     {user.email?.split('@')[0]}
                   </span>
                 </div>
+
                 <button
                   onClick={handleLogout}
-                  className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                  className="flex items-center justify-center w-10 h-10 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-full transition-all duration-200 group"
+                  title={t('logout')}
                 >
-                  <LogOut className="w-4 h-4" />
-                  {t('logout')}
+                  <LogOut className="w-5 h-5 group-hover:scale-110 transition-transform" />
                 </button>
               </div>
             ) : (

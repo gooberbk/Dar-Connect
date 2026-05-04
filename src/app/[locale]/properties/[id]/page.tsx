@@ -66,16 +66,16 @@ export default async function PropertyDetailsPage({
           </div>
         </div>
 
-        {/* Hero image - Taille réduite */}
-        <div className="relative h-[250px] md:h-[350px] max-w-3xl mx-auto w-full rounded-2xl overflow-hidden mb-8 shadow-md animate-fade-in-up stagger-1">
+        {/* Hero image - Full Width Expert Design */}
+        <div className="relative h-[300px] md:h-[450px] lg:h-[550px] w-full rounded-[2rem] overflow-hidden mb-10 shadow-2xl group animate-fade-in-up stagger-1">
           <Image
             src={mainImage}
             alt={property.title}
             fill
-            className="object-cover"
+            className="object-cover transition-transform duration-700 group-hover:scale-105"
             priority
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-90" />
         </div>
 
         {/* Content grid */}
