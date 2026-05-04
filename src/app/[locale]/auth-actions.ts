@@ -31,7 +31,8 @@ export async function login(formData: FormData) {
     if (profile?.role === 'admin') {
       redirect('/admin')
     } else {
-      redirect('/dashboard')
+      // After login, bring regular users to the home page (not reservations).
+      redirect('/')
     }
   }
 

@@ -4,7 +4,7 @@ import { notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import { Link } from '@/navigation';
 import {
-  MapPin, Bed, Bath, Square, Calendar, ArrowLeft,
+  MapPin, Bed, Bath, Square, ArrowLeft,
   CheckCircle, Clock, Shield, Star
 } from 'lucide-react';
 import BookingForm from '@/components/BookingForm';
@@ -47,73 +47,112 @@ export default async function PropertyDetailsPage({
       </div>
 
       <div className="section-container">
-        {/* Title row */}
-        <div className="mb-6 animate-fade-in-up">
-          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
-            {property.title}
-          </h1>
-          <div className="flex items-center gap-4 text-gray-500">
-            <div className="flex items-center gap-1">
-              <MapPin className="w-4 h-4 text-blue-500" />
-              <span>{property.location}</span>
+        {/* Above-the-fold: image left / info right */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start animate-fade-in-up">
+          <div className="relative w-full h-[280px] sm:h-[360px] lg:h-[440px] rounded-3xl overflow-hidden shadow-xl bg-gray-100">
+            <Image
+              src={mainImage}
+              alt={property.title}
+              fill
+              className="object-cover"
+              priority
+            />
+          </div>
+
+          <div className="space-y-6">
+            <div>
+              <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
+                {property.title}
+              </h1>
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-gray-500">
+                <div className="flex items-center gap-1">
+                  <MapPin className="w-4 h-4 text-blue-500" />
+                  <span>{property.location}</span>
+                </div>
+                <div className="flex items-center gap-1 text-yellow-500">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} className="w-4 h-4 fill-current" />
+                  ))}
+                  <span className="text-gray-500 ml-1">(4.9)</span>
+                </div>
+              </div>
             </div>
-            <div className="flex items-center gap-1 text-yellow-500">
-              {[...Array(5)].map((_, i) => (
-                <Star key={i} className="w-4 h-4 fill-current" />
-              ))}
-              <span className="text-gray-500 ml-1">(4.9)</span>
+
+            <div className="card p-6">
+              <div className="flex items-baseline justify-between gap-4">
+                <div className="flex items-baseline gap-2">
+                  <span className="text-3xl font-bold text-gray-900">
+                    {property.price.toLocaleString()} DZD
+                  </span>
+                  <span className="text-gray-500">{t('perNight')}</span>
+                </div>
+                <div className="text-sm font-semibold text-gray-600">{t('entireHome')}</div>
+              </div>
+
+              <div className="mt-5 flex items-center gap-6 text-gray-600">
+                <div className="flex items-center gap-2">
+                  <Bed className="w-5 h-5 text-blue-500" />
+                  <span className="text-sm font-medium">3 {t('beds')}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Bath className="w-5 h-5 text-blue-500" />
+                  <span className="text-sm font-medium">2 {t('baths')}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Square className="w-5 h-5 text-blue-500" />
+                  <span className="text-sm font-medium">120 {t('sqft')}</span>
+                </div>
+              </div>
+
+              <div className="mt-6">
+                {user ? (
+                  <BookingForm
+                    propertyId={property.id}
+                    today={today}
+                    t_selectDate={t('selectDate')}
+                    t_bookNow={t('bookNow')}
+                  />
+                ) : (
+                  <Link
+                    href="/login"
+                    className="w-full flex items-center justify-center gap-2 py-4 px-6 mt-1 bg-blue-600 hover:bg-blue-700 active:scale-[0.98] text-white text-lg font-bold rounded-xl shadow-lg shadow-blue-200/50 transition-all duration-200"
+                  >
+                    {t('loginToBook')}
+                  </Link>
+                )}
+
+                <div className="mt-5 pt-5 border-t border-gray-100 space-y-2.5">
+                  <div className="flex items-center gap-2 text-sm text-gray-500">
+                    <Shield className="w-4 h-4 text-green-500" />
+                    Paiement 100% sécurisé
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-gray-500">
+                    <Clock className="w-4 h-4 text-blue-500" />
+                    Confirmation en moins de 24h
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-gray-500">
+                    <CheckCircle className="w-4 h-4 text-purple-500" />
+                    Annulation gratuite sous 48h
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Hero image - Full Width Expert Design */}
-        <div className="relative h-[300px] md:h-[450px] lg:h-[550px] w-full rounded-[2rem] overflow-hidden mb-10 shadow-2xl group animate-fade-in-up stagger-1">
-          <Image
-            src={mainImage}
-            alt={property.title}
-            fill
-            className="object-cover transition-transform duration-700 group-hover:scale-105"
-            priority
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-90" />
-        </div>
-
-        {/* Content grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 animate-fade-in-up stagger-2">
-          {/* Left: Details */}
+        {/* Details */}
+        <div className="mt-10 grid grid-cols-1 lg:grid-cols-3 gap-8 animate-fade-in-up stagger-1">
           <div className="lg:col-span-2 space-y-6">
-            {/* Property info bar */}
             <div className="card p-6">
-              <div className="flex items-center justify-between pb-5 border-b border-gray-100">
-                <h2 className="text-xl font-semibold text-gray-900">{t('entireHome')}</h2>
-                <div className="flex items-center gap-6 text-gray-600">
-                  <div className="flex flex-col items-center gap-1">
-                    <Bed className="w-6 h-6 text-blue-500" />
-                    <span className="text-xs font-medium">3 {t('beds')}</span>
-                  </div>
-                  <div className="flex flex-col items-center gap-1">
-                    <Bath className="w-6 h-6 text-blue-500" />
-                    <span className="text-xs font-medium">2 {t('baths')}</span>
-                  </div>
-                  <div className="flex flex-col items-center gap-1">
-                    <Square className="w-6 h-6 text-blue-500" />
-                    <span className="text-xs font-medium">120 {t('sqft')}</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="pt-5">
-                <h3 className="text-lg font-semibold text-gray-900 mb-3">{t('description')}</h3>
-                <p className="text-gray-600 leading-relaxed whitespace-pre-line">
-                  {property.description}
-                </p>
-              </div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-3">{t('description')}</h3>
+              <p className="text-gray-600 leading-relaxed whitespace-pre-line">
+                {property.description}
+              </p>
             </div>
 
-            {/* Amenities */}
             <div className="card p-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Points clés</h3>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {[
                   'Wi-Fi inclus',
                   'Parking gratuit',
@@ -131,47 +170,7 @@ export default async function PropertyDetailsPage({
             </div>
           </div>
 
-          {/* Right: Booking card */}
-          <div>
-            <div className="card p-6 sticky top-24">
-              {/* Price */}
-              <div className="flex items-baseline gap-2 mb-6">
-                <span className="text-3xl font-bold text-gray-900">
-                  {property.price.toLocaleString()} DZD
-                </span>
-                <span className="text-gray-500">{t('perNight')}</span>
-              </div>
-
-              {user ? (
-                <BookingForm 
-                  propertyId={property.id} 
-                  today={today} 
-                  t_selectDate={t('selectDate')} 
-                  t_bookNow={t('bookNow')} 
-                />
-              ) : (
-                <Link href="/login" className="w-full flex items-center justify-center gap-2 py-4 px-6 mt-2 bg-blue-600 hover:bg-blue-700 active:scale-[0.98] text-white text-lg font-bold rounded-xl shadow-lg shadow-blue-200/50 transition-all duration-200">
-                  {t('loginToBook')}
-                </Link>
-              )}
-
-              {/* Trust badges */}
-              <div className="mt-5 pt-5 border-t border-gray-100 space-y-2.5">
-                <div className="flex items-center gap-2 text-sm text-gray-500">
-                  <Shield className="w-4 h-4 text-green-500" />
-                  Paiement 100% sécurisé
-                </div>
-                <div className="flex items-center gap-2 text-sm text-gray-500">
-                  <Clock className="w-4 h-4 text-blue-500" />
-                  Confirmation en moins de 24h
-                </div>
-                <div className="flex items-center gap-2 text-sm text-gray-500">
-                  <CheckCircle className="w-4 h-4 text-purple-500" />
-                  Annulation gratuite sous 48h
-                </div>
-              </div>
-            </div>
-          </div>
+          <div className="hidden lg:block" />
         </div>
       </div>
     </main>
