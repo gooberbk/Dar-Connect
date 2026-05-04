@@ -8,7 +8,7 @@
 - Mouloud Belhoul
 
 ## Liens du Projet
-- **URL de Production (Vercel) :** [URL_VERCEL_A_AJOUTER]
+- **URL de Production (Vercel) : https://dar-connect-ierx.vercel.app/fr
 - **Dépôt GitHub : https://github.com/gooberbk/Dar-Connect
 
 ## Identifiants de Test
