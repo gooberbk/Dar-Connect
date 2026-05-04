@@ -18,26 +18,44 @@
 
 ## Mission 4 : Le README "Architecte"
 
-### 1. Le Mapping de notre Thème
-Dans le cadre de notre projet immobilier "Dar-Connect", voici comment l'architecture a été modélisée selon les exigences :
-*   **Table A (Utilisateurs) :** La table `profiles` (liée à Supabase Auth) qui représente les **Locataires/Clients**.
-*   **Table B (Ressources) :** La table `properties` qui représente les **Maisons/Appartements** disponibles à la location.
-*   **Table C (Interactions) :** La table `reservations` qui lie un locataire et une maison avec une date et un statut (En attente, Confirmé, Annulé).
-*   **Storage (Fichiers) :** Un bucket Supabase `id_cards` pour stocker le **Scan de la carte d'identité (PDF/Image)** uploadé lors de la réservation.
+### 1. Mapping du Thème : Dar-Connect (Immobilier)
+*   **Table A (Utilisateurs) :** Locataires (gérés via Supabase Auth).
+*   **Table B (Ressources) :** Maisons (liste des biens disponibles à la location).
+*   **Table C (Interactions) :** Visites (jointure entre un Locataire et une Maison avec date et statut).
+*   **Storage (Fichiers) :** Scan de la carte d'identité du locataire (obligatoire pour valider une visite).
 
-### 2. L'Analyse d'Architecture
+### 2. Analyse d'Architecture (Le "Pourquoi")
 
-**Pourquoi l'utilisation de Vercel + Supabase est financièrement plus logique pour lancer ce projet qu'un serveur classique ?**
-Lancer ce projet avec un serveur classique impliquerait d'importants coûts d'investissement initial (**CAPEX** - Capital Expenditure) : achat de serveurs physiques, routeurs, installation d'une salle climatisée, etc. À cela s'ajoutent les coûts de maintenance fixes, même si l'application n'a aucun utilisateur.
-En utilisant une architecture Cloud Serverless (Vercel + Supabase), nous basculons sur un modèle de dépenses opérationnelles (**OPEX** - Operational Expenditure). Nous ne payons que ce que nous consommons ("Pay-as-you-go"). Pour le lancement, le coût est quasiment nul grâce aux "Free Tiers". Ce modèle réduit drastiquement le risque financier et permet de tester le marché avant d'investir massivement.
+**A. Logique financière : CAPEX vs OPEX**
+L'utilisation de Vercel et Supabase permet de passer d'un modèle CAPEX (Capital Expenditure) à un modèle OPEX (Operating Expenditure) :
+*   **CAPEX (Serveur classique) :** L'achat de serveurs physiques, d'armoires (racks) et de matériel réseau représente un investissement initial lourd et risqué pour un nouveau projet.
+*   **OPEX (Vercel/Supabase) :** On utilise le modèle du Cloud (SaaS/BaaS). Il n'y a aucun coût d'infrastructure au démarrage. Comme vu dans le Chapitre 2 (p. 166), l'économie se fait par la mutualisation des ressources. On ne paie que ce que l'on consomme, ce qui est stratégiquement plus logique pour "Dar-Connect".
 
-**Comment Vercel gère-t-il la scalabilité par rapport à un Data Center physique local ?**
-Dans un Data Center physique, gérer un pic soudain de trafic nécessite d'anticiper la charge en achetant et configurant de nouveaux serveurs (Scale-up/Scale-out manuel). C'est lent et coûteux. 
-Vercel, couplé à Next.js, gère la scalabilité de manière automatique et instantanée via le Serverless et un réseau CDN (Content Delivery Network) global. Si l'application passe de 10 à 10 000 utilisateurs simultanés, Vercel provisionne instantanément des fonctions Serverless pour exécuter le code backend à la demande et distribue les assets statiques depuis le serveur le plus proche géographiquement du visiteur, sans aucune intervention de notre part.
+**B. Scalabilité : Vercel vs Data Center Physique**
+Dans un Data Center local, la scalabilité est limitée par le matériel (climatisation, espace, électricité). Si le trafic de notre site explose, un serveur physique sature.
+Vercel gère la scalabilité de manière Serverless :
+*   Il utilise l'allocation dynamique de la puissance (concept abordé dans le Chapitre 2 sur la virtualisation).
+*   À l'image d'un orchestrateur (type Kubernetes), Vercel multiplie les instances de notre application instantanément en fonction de la demande, sans que nous ayons à gérer la "couche d'abstraction matérielle" (HAL).
 
-**Dans notre application, qu'est-ce qui représente la donnée Structurée et la donnée Non-structurée ?**
-*   **Données Structurées :** Elles sont stockées dans notre base de données relationnelle PostgreSQL (Supabase). Il s'agit des informations avec un schéma strict : les profils utilisateurs (ID, email, rôle), les détails des maisons (prix, localisation, nombre de chambres), et les réservations (dates, statuts).
-*   **Données Non-structurées :** Ce sont les fichiers bruts qui n'ont pas de schéma de base de données fixe. Dans notre projet, il s'agit des images des propriétés et, surtout, des **scans des cartes d'identité (fichiers PDF ou images)** uploadés par les utilisateurs lors de la réservation, qui sont stockés de manière brute dans Supabase Storage.
+**C. Données Structurées vs Non-structurées**
+Dans notre SI "Dar-Connect", nous gérons les deux types de données mentionnés dans le Chapitre 1 :
+*   **Données Structurées :** Ce sont les informations stockées dans nos tables SQL (Noms, adresses des maisons, dates de visites). Elles sont organisées, liées par des clés étrangères et faciles à requêter.
+*   **Données Non-structurées :** Ce sont les scans de cartes d'identité (fichiers images/PDF) stockés dans le Storage. Ces données n'ont pas de format fixe prédéfini et nécessitent un stockage d'objets (Bucket) plutôt qu'une table classique.
+
+---
+
+## 🎥 Conseils pour la Vidéo (Script "Vibe Coding")
+
+**L'Introduction (Le "Vibe") :** 
+"On a voulu créer Dar-Connect en mode agile. Pas de temps perdu à configurer des serveurs Linux, on s'est concentrés sur l'expérience locataire."
+
+**La Démo Technique :**
+*   *Montrez l'Auth :* "Le locataire se connecte, c'est la Table A."
+*   *Montrez la Réservation :* "Il choisit sa maison (Table B) et planifie une visite. Cela crée une ligne dans la Table C."
+*   *Le point fort (Sécurité/RLS) :* "Grâce aux règles RLS de Supabase, même si je connais l'ID d'un autre locataire, je ne peux pas voir ses scans de cartes d'identité. La donnée est isolée au niveau de la ligne SQL."
+
+**La Conclusion "Architecte" :** 
+"On a choisi une architecture Serverless car c'est la seule qui permet d'avoir un SI robuste sans les contraintes de maintenance d'un Data Center physique (climatisation, pannes matérielles)."
 
 ---
 

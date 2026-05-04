@@ -7,7 +7,7 @@ import {
   MapPin, Bed, Bath, Square, Calendar, ArrowLeft,
   CheckCircle, Clock, Shield, Star
 } from 'lucide-react';
-import { createReservation } from '../actions';
+import BookingForm from '@/components/BookingForm';
 
 export default async function PropertyDetailsPage({
   params: { id, locale },
@@ -39,7 +39,7 @@ export default async function PropertyDetailsPage({
       <div className="section-container pt-6">
         <Link
           href="/"
-          className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-gray-900 transition-colors mb-6"
+          className="inline-flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-200 text-sm font-bold text-gray-700 rounded-xl hover:bg-gray-50 hover:text-gray-900 hover:border-gray-300 hover:shadow-sm active:scale-95 transition-all duration-200 mb-6"
         >
           <ArrowLeft className="w-4 h-4" />
           {t('back')}
@@ -143,47 +143,14 @@ export default async function PropertyDetailsPage({
               </div>
 
               {user ? (
-                <form
-                  action={createReservation.bind(null, property.id)}
-                  className="flex flex-col gap-4"
-                >
-                  <div className="flex flex-col gap-1.5">
-                    <label htmlFor="date" className="text-sm font-semibold text-gray-700">
-                      {t('selectDate')}
-                    </label>
-                    <div className="relative">
-                      <Calendar className="absolute left-3.5 top-1/2 -translate-y-1/2 w-[18px] text-gray-400" />
-                      <input
-                        type="date"
-                        id="date"
-                        name="date"
-                        min={today}
-                        required
-                        className="input-field pl-10"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="flex flex-col gap-1.5 mt-2">
-                    <label htmlFor="id_card" className="text-sm font-semibold text-gray-700">
-                      Scan Carte d'Identité (PDF/Image) *
-                    </label>
-                    <input
-                      type="file"
-                      id="id_card"
-                      name="id_card"
-                      accept="image/*,.pdf"
-                      required
-                      className="input-field py-2"
-                    />
-                  </div>
-
-                  <button type="submit" className="btn-primary w-full py-3.5 text-base mt-4">
-                    {t('bookNow')}
-                  </button>
-                </form>
+                <BookingForm 
+                  propertyId={property.id} 
+                  today={today} 
+                  t_selectDate={t('selectDate')} 
+                  t_bookNow={t('bookNow')} 
+                />
               ) : (
-                <Link href="/login" className="btn-primary w-full py-3.5 text-base text-center block">
+                <Link href="/login" className="w-full flex items-center justify-center gap-2 py-4 px-6 mt-2 bg-blue-600 hover:bg-blue-700 active:scale-[0.98] text-white text-lg font-bold rounded-xl shadow-lg shadow-blue-200/50 transition-all duration-200">
                   {t('loginToBook')}
                 </Link>
               )}
