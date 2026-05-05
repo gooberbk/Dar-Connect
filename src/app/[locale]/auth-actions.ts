@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
+import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 import { createClient } from '@/utils/supabase/server'
 
 export async function login(formData: FormData) {
@@ -43,17 +44,56 @@ export async function login(formData: FormData) {
 export async function signup(formData: FormData) {
   const supabase = createClient()
 
-  const data = {
-    email: formData.get('email') as string,
-    password: formData.get('password') as string,
+  const email = (formData.get('email') as string)?.trim().toLowerCase()
+  const password = formData.get('password') as string
+
+  if (!email || !password) {
+    redirect('/signup?message=Email et mot de passe requis')
   }
 
-  const { error } = await supabase.auth.signUp(data)
+  if (password.length < 6) {
+    redirect('/signup?message=Le mot de passe doit contenir au moins 6 caractères')
+  }
+
+  const serviceRoleKey =
+    process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PRIVATE_SUPABASE_SERVICE_ROLE_KEY
+
+  if (serviceRoleKey && process.env.NEXT_PUBLIC_SUPABASE_URL) {
+    const adminClient = createSupabaseClient(process.env.NEXT_PUBLIC_SUPABASE_URL, serviceRoleKey)
+    const { data: createdUser, error: createError } = await adminClient.auth.admin.createUser({
+      email,
+      password,
+      email_confirm: true,
+    })
+
+    if (createError) {
+      redirect(`/signup?message=${encodeURIComponent(createError.message)}`)
+    }
+
+    // Fallback when DB trigger wasn't created yet: keep profile in sync.
+    if (createdUser?.user?.id) {
+      await adminClient.from('profiles').upsert({
+        id: createdUser.user.id,
+        email,
+        role: 'user',
+      })
+    }
+
+    const { error: signInError } = await supabase.auth.signInWithPassword({ email, password })
+    if (signInError) {
+      redirect('/login?message=Compte créé, connectez-vous pour continuer')
+    }
+
+    revalidatePath('/', 'layout')
+    redirect('/')
+  }
+
+  const { error } = await supabase.auth.signUp({ email, password })
 
   if (error) {
     redirect(`/signup?message=${encodeURIComponent(error.message)}`)
   }
 
   revalidatePath('/', 'layout')
-  redirect('/login?message=Vérifiez votre email pour confirmer votre compte')
+  redirect('/login?message=Compte créé. Vérifiez votre email pour confirmer votre compte')
 }
