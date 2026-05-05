@@ -3,7 +3,7 @@ import { addProperty, deleteProperty, updateReservationStatus } from './actions'
 import { Link } from '@/navigation';
 import {
   Trash2, CheckCircle, XCircle, PlusCircle,
-  Building2, CalendarCheck, TrendingUp, Users, Pencil
+  Building2, CalendarCheck, TrendingUp, Users, Pencil, FileText
 } from 'lucide-react';
 
 export default async function AdminDashboard() {
@@ -211,6 +211,7 @@ export default async function AdminDashboard() {
                 <th className="py-3 px-4 font-semibold text-gray-600">Propriété</th>
                 <th className="py-3 px-4 font-semibold text-gray-600">Utilisateur</th>
                 <th className="py-3 px-4 font-semibold text-gray-600">Date</th>
+                <th className="py-3 px-4 font-semibold text-gray-600">Pièce d&apos;identité</th>
                 <th className="py-3 px-4 font-semibold text-gray-600">Statut</th>
                 <th className="py-3 px-4 font-semibold text-gray-600 text-right">Actions</th>
               </tr>
@@ -230,6 +231,21 @@ export default async function AdminDashboard() {
                       month: 'short',
                       year: 'numeric',
                     })}
+                  </td>
+                  <td className="py-3 px-4">
+                    {res.id_card_url ? (
+                      <a
+                        href={res.id_card_url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center gap-1.5 text-blue-600 hover:text-blue-700 hover:bg-blue-50 px-2 py-1 rounded-lg text-sm transition-colors"
+                      >
+                        <FileText className="w-4 h-4" />
+                        Voir
+                      </a>
+                    ) : (
+                      <span className="text-xs text-gray-400">Non fourni</span>
+                    )}
                   </td>
                   <td className="py-3 px-4">
                     <span className={`badge ${
@@ -271,7 +287,7 @@ export default async function AdminDashboard() {
               ))}
               {(!reservations || reservations.length === 0) && (
                 <tr>
-                  <td colSpan={5} className="py-10 text-center text-gray-400">
+                  <td colSpan={6} className="py-10 text-center text-gray-400">
                     Aucune réservation pour le moment.
                   </td>
                 </tr>

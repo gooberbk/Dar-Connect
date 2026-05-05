@@ -19,27 +19,47 @@ export async function createReservation(propertyId: string, formData: FormData) 
     throw new Error('La carte d\'identité est requise.');
   }
 
-  // Upload file to Supabase Storage (ignoring errors as requested)
+  // Upload ID card to Supabase Storage and save its URL on reservation.
   const fileExt = idCardFile.name.split('.').pop();
   const fileName = `${user.id}-${Date.now()}.${fileExt}`;
+  const filePath = `${user.id}/${fileName}`;
 
-  await supabase.storage
+  const { error: uploadError } = await supabase.storage
     .from('id_cards')
-    .upload(fileName, idCardFile)
-    .catch(() => {
-      // Ignore upload errors silently
-    });
+    .upload(filePath, idCardFile);
 
-  // We insert into reservations WITHOUT id_card_url to avoid DB schema crash
+  if (uploadError) {
+    console.error('ID card upload error:', uploadError);
+    throw new Error("Échec d'upload de la pièce d'identité.");
+  }
+
+  const { data: publicUrlData } = supabase.storage.from('id_cards').getPublicUrl(filePath);
+  const idCardUrl = publicUrlData.publicUrl;
+
   const { error } = await supabase.from('reservations').insert({
     property_id: propertyId,
     user_id: user.id,
     date,
+    id_card_url: idCardUrl,
     status: 'pending',
   });
 
-  if (error) {
+  // Backward-compatible fallback if the DB column does not exist yet.
+  if (error?.message?.toLowerCase().includes('id_card_url')) {
+    const { error: fallbackError } = await supabase.from('reservations').insert({
+      property_id: propertyId,
+      user_id: user.id,
+      date,
+      status: 'pending',
+    });
+
+    if (fallbackError) {
+      console.error('Reservation fallback error:', fallbackError);
+      throw new Error('Erreur lors de la création de réservation.');
+    }
+  } else if (error) {
     console.error('Reservation error:', error);
+    throw new Error('Erreur lors de la création de réservation.');
   }
 
   revalidatePath('/');

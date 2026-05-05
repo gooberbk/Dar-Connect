@@ -55,10 +55,11 @@ export async function signup(formData: FormData) {
     redirect('/signup?message=Le mot de passe doit contenir au moins 6 caractères')
   }
 
+  const instantSignupEnabled = process.env.SUPABASE_INSTANT_SIGNUP === 'true'
   const serviceRoleKey =
     process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PRIVATE_SUPABASE_SERVICE_ROLE_KEY
 
-  if (serviceRoleKey && process.env.NEXT_PUBLIC_SUPABASE_URL) {
+  if (instantSignupEnabled && serviceRoleKey && process.env.NEXT_PUBLIC_SUPABASE_URL) {
     const adminClient = createSupabaseClient(process.env.NEXT_PUBLIC_SUPABASE_URL, serviceRoleKey)
     const { data: createdUser, error: createError } = await adminClient.auth.admin.createUser({
       email,
@@ -70,7 +71,6 @@ export async function signup(formData: FormData) {
       redirect(`/signup?message=${encodeURIComponent(createError.message)}`)
     }
 
-    // Fallback when DB trigger wasn't created yet: keep profile in sync.
     if (createdUser?.user?.id) {
       await adminClient.from('profiles').upsert({
         id: createdUser.user.id,
@@ -88,12 +88,22 @@ export async function signup(formData: FormData) {
     redirect('/')
   }
 
-  const { error } = await supabase.auth.signUp({ email, password })
+  const baseUrl =
+    process.env.NEXT_PUBLIC_SITE_URL ||
+    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000')
+
+  const { error } = await supabase.auth.signUp({
+    email,
+    password,
+    options: {
+      emailRedirectTo: `${baseUrl}/auth/confirm?next=/login`,
+    },
+  })
 
   if (error) {
     redirect(`/signup?message=${encodeURIComponent(error.message)}`)
   }
 
   revalidatePath('/', 'layout')
-  redirect('/login?message=Compte créé. Vérifiez votre email pour confirmer votre compte')
+  redirect('/login?message=Compte créé. Vérifiez votre email puis connectez-vous')
 }
